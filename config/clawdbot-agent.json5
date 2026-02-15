@@ -1,0 +1,29 @@
+// Clawdbot configuration for Specialist Agents (Luna, Marcus, Rex, Vigil, Quinn)
+// Copy to /home/openclaw/.clawdbot/clawdbot.json
+{
+  agents: {
+    defaults: {
+      workspace: "/home/openclaw/workspace",
+      model: { 
+        primary: "anthropic/claude-sonnet-4-5" 
+      },
+      compaction: {
+        mode: "safeguard",
+        memoryFlush: { 
+          enabled: true, 
+          softThresholdTokens: 4000 
+        }
+      }
+    }
+  },
+  
+  gateway: {
+    port: 18789,
+    mode: "local",
+    bind: "0.0.0.0",
+    auth: { 
+      mode: "password", 
+      password: "${GATEWAY_PASSWORD}"  // Set a strong password
+    }
+  }
+}
