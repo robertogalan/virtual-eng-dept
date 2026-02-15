@@ -64,8 +64,9 @@ An AI-powered engineering team orchestrated by [Clawdbot](https://github.com/cla
 ## Documentation
 
 - [Deployment Plan](docs/DEPLOYMENT.md) — Full infrastructure setup guide
-- [PM System Prompt](agents/oscar/SOUL.md) — Oscar's orchestration instructions
-- [Agent Configs](agents/) — Individual agent personalities and rules
+- [PM System Prompt](docs/PM-SYSTEM-PROMPT.md) — Complete orchestration instructions for Oscar
+- [Agent Personalities](agents/) — Individual agent SOUL.md files
+- [Config Templates](config/) — Clawdbot configuration templates
 - [Scripts](scripts/) — Setup and automation scripts
 
 ## Quick Start
