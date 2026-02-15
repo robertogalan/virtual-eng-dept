@@ -63,6 +63,7 @@ An AI-powered engineering team orchestrated by [Clawdbot](https://github.com/cla
 
 ## Documentation
 
+- [Pipeline Flowchart](docs/flowchart.html) — Visual task lifecycle (open in browser)
 - [Deployment Plan](docs/DEPLOYMENT.md) — Full infrastructure setup guide
 - [PM System Prompt](docs/PM-SYSTEM-PROMPT.md) — Complete orchestration instructions for Oscar
 - [Agent Personalities](agents/) — Individual agent SOUL.md files
