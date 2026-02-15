@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Engineering Department — Pipeline Flowchart</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      color: #e0e0e8;
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .canvas {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 32px 64px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: #f0f0f5;
+      margin-bottom: 8px;
+    }
+    .header h1 span { color: #6ee7b7; font-weight: 600; }
+    .header p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .connector {
+      display: flex;
+      justify-content: center;
+      padding: 4px 0;
+    }
+    .connector .line {
+      width: 2px;
+      height: 32px;
+      background: linear-gradient(180deg, #333 0%, #555 100%);
+      position: relative;
+    }
+    .connector .line::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #555;
+    }
+
+    .node {
+      border-radius: 12px;
+      padding: 20px 24px;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+    .node:hover { transform: translateY(-1px); }
+    .node-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      opacity: 0.7;
+    }
+    .node-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .node-desc {
+      font-size: 13px;
+      opacity: 0.65;
+      line-height: 1.5;
+    }
+
+    .node-source {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid #2a2a4a;
+    }
+    .node-source .node-label { color: #818cf8; }
+    .node-source .node-title { color: #c7d2fe; }
+
+    .node-pm {
+      background: linear-gradient(135deg, #1a2e1a 0%, #162e21 100%);
+      border: 1px solid #2a4a2a;
+    }
+    .node-pm .node-label { color: #6ee7b7; }
+    .node-pm .node-title { color: #a7f3d0; }
+
+    .node-agent {
+      background: linear-gradient(135deg, #1e1a2e 0%, #251640 100%);
+      border: 1px solid #3a2a5a;
+    }
+    .node-agent .node-label { color: #c084fc; }
+    .node-agent .node-title { color: #e9d5ff; }
+
+    .node-security {
+      background: linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%);
+      border: 1px solid #5a2a2a;
+    }
+    .node-security .node-label { color: #fca5a5; }
+    .node-security .node-title { color: #fecaca; }
+
+    .node-qa {
+      background: linear-gradient(135deg, #2e2a1a 0%, #3e3216 100%);
+      border: 1px solid #5a4a2a;
+    }
+    .node-qa .node-label { color: #fcd34d; }
+    .node-qa .node-title { color: #fef3c7; }
+
+    .node-human {
+      background: linear-gradient(135deg, #1a2a2e 0%, #163e3e 100%);
+      border: 1px solid #2a4a5a;
+    }
+    .node-human .node-label { color: #67e8f9; }
+    .node-human .node-title { color: #cffafe; }
+
+    .node-done {
+      background: linear-gradient(135deg, #0f2a1a 0%, #0a3d20 100%);
+      border: 1px solid #166534;
+    }
+    .node-done .node-label { color: #4ade80; }
+    .node-done .node-title { color: #bbf7d0; }
+
+    .node-staging {
+      background: linear-gradient(135deg, #1a2e2e 0%, #163030 100%);
+      border: 1px solid #2a4a4a;
+    }
+    .node-staging .node-label { color: #5eead4; }
+    .node-staging .node-title { color: #99f6e4; }
+
+    .parallel-container {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+    .parallel-container .node {
+      flex: 1;
+      max-width: 260px;
+    }
+
+    .branch-split, .branch-merge {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0;
+      position: relative;
+    }
+    .branch-split::before, .branch-merge::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%;
+      height: 2px;
+      background: #333;
+    }
+    .branch-split .dot, .branch-merge .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #555;
+      border: 2px solid #777;
+      z-index: 1;
+    }
+
+    .decision {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0;
+    }
+    .decision-box {
+      background: #1a1a2e;
+      border: 2px solid #fcd34d;
+      border-radius: 8px;
+      padding: 12px 32px;
+      text-align: center;
+    }
+    .decision-box .node-title {
+      font-size: 13px;
+      color: #fef3c7;
+    }
+
+    .decision-paths {
+      display: flex;
+      justify-content: center;
+      gap: 200px;
+      padding: 4px 0 0;
+    }
+    .decision-path-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .path-yes {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+    }
+    .path-no {
+      color: #fca5a5;
+      background: rgba(252, 165, 165, 0.1);
+      border: 1px solid rgba(252, 165, 165, 0.2);
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+    .status-ready {
+      background: rgba(129, 140, 248, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(129, 140, 248, 0.3);
+    }
+    .status-progress {
+      background: rgba(192, 132, 252, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(192, 132, 252, 0.3);
+    }
+    .status-review {
+      background: rgba(252, 211, 77, 0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(252, 211, 77, 0.3);
+    }
+    .status-staging {
+      background: rgba(94, 234, 212, 0.15);
+      color: #5eead4;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+    }
+    .status-qa {
+      background: rgba(103, 232, 249, 0.15);
+      color: #67e8f9;
+      border: 1px solid rgba(103, 232, 249, 0.3);
+    }
+    .status-done {
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .agent-card {
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .agent-card .icon {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .agent-card .name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .agent-card .scope {
+      font-size: 11px;
+      opacity: 0.5;
+      line-height: 1.4;
+    }
+
+    .slack-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(249, 168, 212, 0.05);
+      border: 1px dashed rgba(249, 168, 212, 0.2);
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin: 4px auto;
+      max-width: 600px;
+    }
+    .slack-strip .slack-icon {
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .slack-strip .slack-msg {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #f9a8d4;
+      opacity: 0.7;
+    }
+
+    .loop-back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+    .loop-back .arrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #fca5a5;
+      background: rgba(252, 165, 165, 0.08);
+      border: 1px solid rgba(252, 165, 165, 0.15);
+      padding: 4px 14px;
+      border-radius: 20px;
+    }
+
+    .phase-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 40px 0 24px;
+    }
+    .phase-divider::before, .phase-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #333, transparent);
+    }
+    .phase-divider .phase-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: #555;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 800px) {
+      .agent-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .parallel-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .parallel-container .node {
+        max-width: 100%;
+      }
+      .decision-paths {
+        gap: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="canvas">
+  <div class="header">
+    <h1><span>Virtual Engineering</span> Pipeline</h1>
+    <p>AI Agent Team &mdash; Task Lifecycle</p>
+  </div>
+
+  <!-- PHASE 1: INTAKE -->
+  <div class="phase-divider">
+    <span class="phase-label">Phase 1 &mdash; Intake</span>
+  </div>
+
+  <div class="node node-source">
+    <div class="node-label">ClickUp</div>
+    <div class="node-title">Task enters "Ready"</div>
+    <div class="node-desc">Created by any team member with description + acceptance criteria</div>
+    <span class="status-badge status-ready">Ready</span>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="node node-pm">
+    <div class="node-label">Oscar &mdash; PM Orchestrator</div>
+    <div class="node-title">Decompose &amp; Dispatch</div>
+    <div class="node-desc">Read task &rarr; classify by domain &rarr; split if multi-domain &rarr; brief agent(s) with structured spec</div>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="slack-strip">
+    <span class="slack-icon">#</span>
+    <span class="slack-msg">#engineering &mdash; "Starting [CU-ID]: Build review dashboard. Assigned to Luna. ETA: 2h."</span>
+  </div>
+
+  <!-- PHASE 2: BUILD -->
+  <div class="phase-divider">
+    <span class="phase-label">Phase 2 &mdash; Build (Specialist Agents)</span>
+  </div>
+
+  <div class="agent-grid">
+    <div class="agent-card node-agent">
+      <div class="icon">&lt;/&gt;</div>
+      <div class="name">Luna</div>
+      <div class="scope">Frontend: Tailwind, vanilla JS, dashboards, landing pages</div>
+    </div>
+    <div class="agent-card node-agent">
+      <div class="icon">{ }</div>
+      <div class="name">Marcus</div>
+      <div class="scope">Backend: Flask/Python APIs, SQLite, data pipelines</div>
+    </div>
+    <div class="agent-card node-staging">
+      <div class="icon">&#9881;</div>
+      <div class="name">Rex</div>
+      <div class="scope">DevOps: nginx, PM2, CI/CD, deployments</div>
+    </div>
+    <div class="agent-card node-security">
+      <div class="icon">&#128274;</div>
+      <div class="name">Vigil</div>
+      <div class="scope">Security: Vuln scans, secrets detection, backups</div>
+    </div>
+    <div class="agent-card node-qa">
+      <div class="icon">&#10003;</div>
+      <div class="name">Quinn</div>
+      <div class="scope">QA: Code review, testing, acceptance validation</div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="node node-agent" style="text-align:center; max-width: 500px; margin: 0 auto;">
+    <div class="node-label">Agent Output</div>
+    <div class="node-title">PR opened on GitHub</div>
+    <div class="node-desc">Branch follows prefix convention &bull; CI runs automatically</div>
+    <span class="status-badge status-progress">In Progress &rarr; In Review</span>
+  </div>
+
+  <!-- PHASE 3: SECURITY + QA -->
+  <div class="phase-divider">
+    <span class="phase-label">Phase 3 &mdash; Security Scan + QA Review</span>
+  </div>
+
+  <div class="branch-split"><div class="dot"></div></div>
+
+  <div class="parallel-container">
+    <div class="node node-security">
+      <div class="node-label">Vigil &mdash; Security Scan</div>
+      <div class="node-title">Automated Security Gate</div>
+      <div class="node-desc">
+        Hardcoded secrets &bull; CVE check (pip audit) &bull; Config misconfigs &bull; Exposed endpoints &bull; Env var validation
+      </div>
+    </div>
+    <div class="node node-qa">
+      <div class="node-label">Quinn &mdash; Code Review</div>
+      <div class="node-title">Quality Gate</div>
+      <div class="node-desc">
+        Acceptance criteria match &bull; Error handling &bull; Performance check &bull; Import/dependency validation
+      </div>
+    </div>
+  </div>
+
+  <div class="branch-merge"><div class="dot"></div></div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="decision">
+    <div class="decision-box">
+      <div class="node-title">Critical / High issues found?</div>
+    </div>
+  </div>
+
+  <div class="decision-paths">
+    <span class="decision-path-label path-no">NO &mdash; Pass</span>
+    <span class="decision-path-label path-yes">YES &mdash; Fail</span>
+  </div>
+
+  <div class="connector" style="margin-top: 4px;"><div class="line"></div></div>
+
+  <div class="parallel-container">
+    <div class="node node-pm" style="max-width: 340px;">
+      <div class="node-label">Pass</div>
+      <div class="node-title">Deploy to Staging</div>
+      <div class="node-desc">PR branch auto-deployed &rarr; health check &rarr; staging URL posted to Slack</div>
+      <span class="status-badge status-review">In Review &rarr; Staging</span>
+    </div>
+    <div class="node node-security" style="max-width: 340px;">
+      <div class="node-label">Fail</div>
+      <div class="node-title">Send back to agent</div>
+      <div class="node-desc">Specific fix instructions &bull; Max 2 retry cycles &bull; Then escalate to Tech Lead</div>
+    </div>
+  </div>
+
+  <div class="loop-back">
+    <span class="arrow">&circlearrowleft; Retry loop (max 2x) &rarr; back to agent</span>
+  </div>
+
+  <div class="slack-strip">
+    <span class="slack-icon">&#9888;</span>
+    <span class="slack-msg">#engineering-alerts &mdash; "Vigil flagged CRITICAL on [CU-ID]: API key in config.py. PR held."</span>
+  </div>
+
+  <!-- PHASE 4: STAGING -->
+  <div class="phase-divider">
+    <span class="phase-label">Phase 4 &mdash; Staging Verification</span>
+  </div>
+
+  <div class="node node-staging" style="max-width: 600px; margin: 0 auto;">
+    <div class="node-label">Rex &mdash; Auto Deploy</div>
+    <div class="node-title">Staging Environment</div>
+    <div class="node-desc">
+      PR branch auto-deployed &bull; Health check (no 500s, app loads, key routes respond) &bull; If deploy fails &rarr; Rex fixes infra, or original agent fixes code (max 2 retries)
+    </div>
+    <span class="status-badge status-staging">Staging</span>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="slack-strip">
+    <span class="slack-icon">#</span>
+    <span class="slack-msg">#engineering &mdash; "[CU-ID] deployed to staging: https://staging.example.com &mdash; Ready for review @techlead"</span>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <!-- PHASE 5: HUMAN REVIEW -->
+  <div class="phase-divider">
+    <span class="phase-label">Phase 5 &mdash; Human Review</span>
+  </div>
+
+  <div class="node node-human">
+    <div class="node-label">Tech Lead / CTO</div>
+    <div class="node-title">Test on Staging &amp; Approve</div>
+    <div class="node-desc">
+      Tests feature on staging URL &bull; Reviews PR against requirements &bull; Approves or requests changes &bull; <strong>Sole merge authority</strong> &bull; Issues "merge and deploy" command to Oscar
+    </div>
+    <span class="status-badge status-qa">QA</span>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="node node-pm" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <div class="node-label">Oscar &mdash; Execute Command</div>
+    <div class="node-title">Merge PR &rarr; Production Deploy</div>
+    <div class="node-desc">Oscar merges on human approval &bull; Rex auto-deploys to production</div>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="slack-strip">
+    <span class="slack-icon">#</span>
+    <span class="slack-msg">#engineering &mdash; "[CU-ID] PR merged. Deployed to production. Task complete."</span>
+  </div>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <div class="node node-done" style="text-align: center;">
+    <div class="node-label">ClickUp Auto-Close</div>
+    <div class="node-title">Done &#10003;</div>
+    <div class="node-desc">GitHub integration moves task to Done on merge</div>
+    <span class="status-badge status-done">Done</span>
+  </div>
+
+  <!-- PHASE 6: PROACTIVE -->
+  <div class="phase-divider">
+    <span class="phase-label">Scheduled &mdash; Proactive Security + Backups</span>
+  </div>
+
+  <div class="parallel-container">
+    <div class="node node-security" style="max-width: 400px;">
+      <div class="node-label">Vigil &mdash; Weekly Audit</div>
+      <div class="node-title">Full Repo Security Scan</div>
+      <div class="node-desc">
+        Dependency audit &bull; nginx/proxy config review &bull; .env &amp; secrets management &bull; GitHub Actions injection check &bull; Report posted to #engineering
+      </div>
+    </div>
+    <div class="node node-security" style="max-width: 400px;">
+      <div class="node-label">Vigil &mdash; Nightly @ 02:00 UTC</div>
+      <div class="node-title">Database Backups</div>
+      <div class="node-desc">
+        Dump all SQLite databases &bull; Compress with timestamp &bull; Verify integrity &bull; Prune old backups (30 days daily, weekly forever)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
