@@ -61,10 +61,14 @@ An AI-powered engineering team orchestrated by [Clawdbot](https://github.com/cla
 | Communication | Slack |
 | AI | Claude (Anthropic) via Clawdbot |
 
-## Documentation
+## Live Documentation
 
-- [Pipeline Flowchart (Technical)](docs/flowchart.html) — Detailed task lifecycle for engineers
-- [Pipeline Flowchart (Simple)](docs/flowchart-simple.html) — Non-technical explanation for stakeholders
+**[View Pipeline Flowcharts →](https://robertogalan.github.io/virtual-eng-dept/)**
+
+- [Technical Flowchart](https://robertogalan.github.io/virtual-eng-dept/flowchart.html) — Detailed task lifecycle for engineers
+- [Simple Flowchart](https://robertogalan.github.io/virtual-eng-dept/flowchart-simple.html) — Non-technical explanation for stakeholders
+
+## Documentation
 - [Deployment Plan](docs/DEPLOYMENT.md) — Full infrastructure setup guide
 - [PM System Prompt](docs/PM-SYSTEM-PROMPT.md) — Complete orchestration instructions for Oscar
 - [Agent Personalities](agents/) — Individual agent SOUL.md files
