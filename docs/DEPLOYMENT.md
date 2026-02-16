@@ -10,7 +10,7 @@ Complete infrastructure setup for the Virtual Engineering Department.
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌─────────────────┐         ┌─────────────┐                   │
-│  │   CLAWDBOT PM   │◄───────►│   ClickUp   │                   │
+│  │   OPENCLAW PM   │◄───────►│   ClickUp   │                   │
 │  │   "Oscar"       │         │   (Kanban)  │                   │
 │  │   Orchestrator  │         └─────────────┘                   │
 │  └────────┬────────┘                                           │
@@ -82,7 +82,7 @@ Add to `/etc/hosts` on each VPS:
 
 ### Create a GitHub App
 
-1. Go to: `https://github.com/organizations/YOUR_ORG/settings/apps/new`
+1. Go to: `https://github.com/organizations/<YOUR_GITHUB_ORG>/settings/apps/new`
 2. Name: `OpenClaw Engineering`
 3. Permissions:
    - Repository: Contents (Read & Write)
@@ -111,7 +111,7 @@ Run the setup script on each VPS:
 ssh root@<vps-ip>
 
 # Download and run setup script
-curl -O https://raw.githubusercontent.com/YOUR_ORG/virtual-eng-dept/main/scripts/setup-agent.sh
+curl -O https://raw.githubusercontent.com/<YOUR_GITHUB_ORG>/virtual-eng-dept/main/scripts/setup-agent.sh
 chmod +x setup-agent.sh
 ./setup-agent.sh <agent-name>  # oscar, luna, marcus, rex, vigil, quinn
 ```
@@ -119,7 +119,7 @@ chmod +x setup-agent.sh
 ### Manual Steps After Script
 
 1. Copy the agent's SOUL.md to `/home/openclaw/workspace/`
-2. Copy clawdbot.json to `/home/openclaw/.clawdbot/`
+2. Copy openclaw.json to `/home/openclaw/.openclaw/`
 3. Setup GitHub CLI auth:
    ```bash
    su - openclaw
@@ -127,16 +127,16 @@ chmod +x setup-agent.sh
    ```
 4. Start the service:
    ```bash
-   systemctl start clawdbot
+   systemctl start openclaw
    ```
 
 ---
 
-## Phase 4: Clawdbot Configuration
+## Phase 4: OpenClaw Configuration
 
 ### PM Orchestrator (Oscar)
 
-**`/home/openclaw/.clawdbot/clawdbot.json`:**
+**`/home/openclaw/.openclaw/openclaw.json`:**
 
 ```json5
 {
@@ -186,7 +186,7 @@ Each specialist agent uses a simpler config focused on Claude Code execution:
   gateway: {
     port: 18789,
     mode: "local",
-    bind: "0.0.0.0",
+    bind: "127.0.0.1",  // Localhost only — agents don't need external access
     auth: { mode: "password", password: "${GATEWAY_PASSWORD}" }
   }
 }
@@ -296,7 +296,7 @@ crontab -e
 │                                                                  │
 │  4. HUMAN APPROVAL                                               │
 │     Human tests on staging                                       │
-│     Human: "merge and deploy" (via Clawdbot PM)                 │
+│     Human: "merge and deploy" (via OpenClaw PM)                 │
 │                                                                  │
 │  5. PRODUCTION                                                   │
 │     Oscar triggers merge                                         │
@@ -310,18 +310,7 @@ crontab -e
 
 ## Human Commands
 
-Issue natural language commands to Oscar via Slack or Clawdbot:
-
-| Command | Action |
-|---------|--------|
-| `merge and deploy [task]` | Merges PR, triggers production deploy |
-| `hold [task]` | Pauses work, moves to backlog |
-| `prioritize [task]` | Bumps to top of queue |
-| `assign [task] to [agent]` | Manual dispatch override |
-| `status` | Reports all active tasks |
-| `deploy staging [task]` | Forces staging redeploy |
-| `rollback [task]` | Reverts last production deploy |
-| `what's blocking?` | Lists blocked tasks |
+See [PM System Prompt — Human Commands](PM-SYSTEM-PROMPT.md#human-commands) for the full command reference.
 
 ---
 
@@ -354,10 +343,10 @@ Issue natural language commands to Oscar via Slack or Clawdbot:
 [ ] Per-Agent Setup (repeat 6x)
     [ ] Run setup-agent.sh
     [ ] Copy SOUL.md
-    [ ] Configure clawdbot.json
+    [ ] Configure openclaw.json
     [ ] GitHub CLI auth
     [ ] Test Claude Code headless
-    [ ] Start Clawdbot service
+    [ ] Start OpenClaw service
 
 [ ] Vigil-Specific
     [ ] Setup backup script

@@ -1,6 +1,6 @@
 # Virtual Engineering Department
 
-An AI-powered engineering team orchestrated by [Clawdbot](https://github.com/clawdbot/clawdbot). Deploy a fleet of specialized Claude Code agents managed by a PM orchestrator that handles task decomposition, dispatch, quality gates, and deployment automation.
+An AI-powered engineering team orchestrated by [OpenClaw](https://github.com/openclaw/openclaw). Deploy a fleet of specialized Claude Code agents managed by a PM orchestrator that handles task decomposition, dispatch, quality gates, and deployment automation.
 
 ## Architecture
 
@@ -10,7 +10,7 @@ An AI-powered engineering team orchestrated by [Clawdbot](https://github.com/cla
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌─────────────────┐         ┌─────────────┐                   │
-│  │   CLAWDBOT PM   │◄───────►│   ClickUp   │                   │
+│  │   OPENCLAW PM   │◄───────►│   ClickUp   │                   │
 │  │   "Oscar"       │         │   (Kanban)  │                   │
 │  │   Orchestrator  │         └─────────────┘                   │
 │  └────────┬────────┘                                           │
@@ -59,7 +59,7 @@ An AI-powered engineering team orchestrated by [Clawdbot](https://github.com/cla
 | Version Control | GitHub |
 | Task Management | ClickUp |
 | Communication | Slack |
-| AI | Claude (Anthropic) via Clawdbot |
+| AI | Claude (Anthropic) via OpenClaw |
 
 ## Live Documentation
 
@@ -72,31 +72,35 @@ An AI-powered engineering team orchestrated by [Clawdbot](https://github.com/cla
 - [Deployment Plan](docs/DEPLOYMENT.md) — Full infrastructure setup guide
 - [PM System Prompt](docs/PM-SYSTEM-PROMPT.md) — Complete orchestration instructions for Oscar
 - [Agent Personalities](agents/) — Individual agent SOUL.md files
-- [Config Templates](config/) — Clawdbot configuration templates
+- [Config Templates](config/) — OpenClaw configuration templates
+- [Environment Variables](.env.example) — All required secrets and config
 - [Scripts](scripts/) — Setup and automation scripts
 
 ## Quick Start
 
-1. **Provision Infrastructure**
-   ```bash
-   # 6x VPS instances (Hetzner CX32 recommended)
-   # See docs/DEPLOYMENT.md for details
-   ```
+### Option A: Single VPS (recommended for getting started)
 
-2. **Setup Each Agent**
-   ```bash
-   ./scripts/setup-agent.sh <agent-name>
-   ```
+Run all agents on one server — simpler to manage and sufficient for most teams:
 
-3. **Configure Integrations**
+1. **Provision 1x VPS** (Hetzner CX32 or similar: 4 vCPU, 8GB RAM)
+2. **Run setup:** `./scripts/setup-agent.sh oscar`
+3. **Configure integrations** (ClickUp, GitHub, Slack, Anthropic API key)
+4. **Start:** `systemctl start openclaw`
+
+### Option B: Multi-VPS (for parallel execution)
+
+1. **Provision 6x VPS instances** (see [Deployment Guide](docs/DEPLOYMENT.md))
+   ```bash
+   ./scripts/setup-agent.sh <agent-name>  # Repeat for each agent
+   ```
+2. **Configure Integrations**
    - ClickUp API token
    - GitHub App credentials
    - Slack bot tokens
    - Anthropic API key
-
-4. **Deploy**
+3. **Deploy**
    ```bash
-   systemctl start clawdbot
+   systemctl start openclaw
    ```
 
 ## Deployment Flow

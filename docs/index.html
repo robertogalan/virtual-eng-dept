@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtual Engineering Department — Pipeline Docs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #e0e0e8;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .container {
+    max-width: 520px;
+    text-align: center;
+    padding: 48px 24px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  h1 span { color: #6ee7b7; font-weight: 600; }
+  .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+  .links { display: flex; flex-direction: column; gap: 16px; }
+  a {
+    display: block;
+    padding: 20px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  a:hover { transform: translateY(-2px); }
+  .link-tech {
+    background: linear-gradient(135deg, #1e1a2e, #251640);
+    border: 1px solid #3a2a5a;
+    color: #e9d5ff;
+  }
+  .link-tech:hover { border-color: #c084fc; }
+  .link-simple {
+    background: linear-gradient(135deg, #1a2e1a, #162e21);
+    border: 1px solid #2a4a2a;
+    color: #a7f3d0;
+  }
+  .link-simple:hover { border-color: #6ee7b7; }
+  .link-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .link-desc { font-size: 13px; opacity: 0.6; }
+  .gh {
+    margin-top: 40px;
+    font-size: 13px;
+    color: #555;
+  }
+  .gh a {
+    display: inline;
+    color: #818cf8;
+    background: none;
+    border: none;
+    padding: 0;
+    text-decoration: underline;
+  }
+  .gh a:hover { color: #a5b4fc; transform: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><span>Virtual</span> Engineering Department</h1>
+  <p class="sub">Pipeline Documentation</p>
+  <div class="links">
+    <a href="flowchart.html" class="link-tech">
+      <div class="link-title">Technical Pipeline Flowchart</div>
+      <div class="link-desc">Detailed task lifecycle — agents, quality gates, staging, deploy</div>
+    </a>
+    <a href="flowchart-simple.html" class="link-simple">
+      <div class="link-title">Non-Technical Overview</div>
+      <div class="link-desc">How a task goes from idea to live — for stakeholders</div>
+    </a>
+  </div>
+  <p class="gh"><a href="https://github.com/robertogalan/virtual-eng-dept">View on GitHub</a></p>
+</div>
+</body>
+</html>

@@ -64,7 +64,7 @@ done
 # Also backup important config files
 echo "[$(date)] Backing up config files..."
 mkdir -p $STAGING_DIR/config
-cp -r /home/openclaw/.clawdbot $STAGING_DIR/config/ 2>/dev/null || true
+cp -r /home/openclaw/.openclaw $STAGING_DIR/config/ 2>/dev/null || true
 cp /home/openclaw/workspace/*.md $STAGING_DIR/config/ 2>/dev/null || true
 
 # Create compressed archive
@@ -96,7 +96,14 @@ echo "[$(date)] Pruning old backups (keeping $RETENTION_DAYS days)..."
 find $BACKUP_DIR -name "backup-*.tar.gz" -mtime +$RETENTION_DAYS | while read old_backup; do
     # Keep weekly backups (Sundays) indefinitely
     BACKUP_DATE=$(basename $old_backup | sed 's/backup-//' | sed 's/.tar.gz//')
-    DAY_OF_WEEK=$(date -d "$BACKUP_DATE" +%u 2>/dev/null || echo "0")
+    # GNU date uses -d, BSD (macOS) uses -j -f
+    if date -d "$BACKUP_DATE" +%u &>/dev/null; then
+        DAY_OF_WEEK=$(date -d "$BACKUP_DATE" +%u)
+    elif date -j -f "%Y-%m-%d" "$BACKUP_DATE" +%u &>/dev/null; then
+        DAY_OF_WEEK=$(date -j -f "%Y-%m-%d" "$BACKUP_DATE" +%u)
+    else
+        DAY_OF_WEEK="0"
+    fi
     
     if [ "$DAY_OF_WEEK" = "7" ]; then
         echo "  Keeping weekly backup: $old_backup"

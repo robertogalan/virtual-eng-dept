@@ -14,6 +14,9 @@ echo "=== Setting up OpenClaw agent: $AGENT_NAME ==="
 # 1. Create service user
 echo "[1/8] Creating service user..."
 useradd -m -s /bin/bash openclaw 2>/dev/null || echo "User openclaw already exists"
+# WARNING: This grants passwordless root access to the openclaw user.
+# For production, scope sudo to only the commands each agent needs.
+# Example: openclaw ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart openclaw, /usr/bin/pm2 *
 echo "openclaw ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/openclaw
 
 # 2. Install system packages
@@ -34,9 +37,9 @@ fi
 echo "[4/8] Installing PM2..."
 npm install -g pm2
 
-# 5. Install Clawdbot
-echo "[5/8] Installing Clawdbot..."
-npm install -g clawdbot
+# 5. Install OpenClaw
+echo "[5/8] Installing OpenClaw..."
+npm install -g openclaw
 
 # 6. Install Claude Code (for specialist agents, not PM)
 if [ "$AGENT_NAME" != "oscar" ]; then
@@ -61,7 +64,7 @@ echo "[8/8] Setting up workspace..."
 su - openclaw << 'EOF'
 mkdir -p ~/workspace
 mkdir -p ~/logs
-mkdir -p ~/.clawdbot
+mkdir -p ~/.openclaw
 
 # Git config
 git config --global user.name "OpenClaw Agent"
@@ -89,18 +92,18 @@ RUNSCRIPT
 chmod +x ~/workspace/run-agent.sh
 EOF
 
-# Setup Clawdbot as systemd service
+# Setup OpenClaw as systemd service
 echo "Setting up systemd service..."
-cat > /etc/systemd/system/clawdbot.service << EOF
+cat > /etc/systemd/system/openclaw.service << EOF
 [Unit]
-Description=Clawdbot Agent ($AGENT_NAME)
+Description=OpenClaw Agent ($AGENT_NAME)
 After=network.target
 
 [Service]
 Type=simple
 User=openclaw
 WorkingDirectory=/home/openclaw/workspace
-ExecStart=/usr/bin/clawdbot gateway
+ExecStart=/usr/bin/openclaw gateway
 Restart=always
 RestartSec=10
 Environment=NODE_ENV=production
@@ -110,17 +113,17 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable clawdbot
+systemctl enable openclaw
 
 echo ""
 echo "=== Setup complete for $AGENT_NAME ==="
 echo ""
 echo "Next steps:"
 echo "1. Copy SOUL.md to /home/openclaw/workspace/"
-echo "2. Copy clawdbot.json to /home/openclaw/.clawdbot/"
-echo "3. Set environment variables in /home/openclaw/.clawdbot/clawdbot.json"
+echo "2. Copy openclaw.json to /home/openclaw/.openclaw/"
+echo "3. Set environment variables in /home/openclaw/.openclaw/openclaw.json"
 echo "4. Setup GitHub auth: su - openclaw && gh auth login"
 echo "5. Clone your repos to /home/openclaw/workspace/"
-echo "6. Start service: systemctl start clawdbot"
-echo "7. Check logs: journalctl -u clawdbot -f"
+echo "6. Start service: systemctl start openclaw"
+echo "7. Check logs: journalctl -u openclaw -f"
 echo ""
